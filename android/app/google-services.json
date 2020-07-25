@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "353526672622",
+    "firebase_url": "https://besocial-21d9f.firebaseio.com",
+    "project_id": "besocial-21d9f",
+    "storage_bucket": "besocial-21d9f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:353526672622:android:d372c819b1bfffc6af97ff",
+        "android_client_info": {
+          "package_name": "com.abhishek.besocial"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "353526672622-31n1ovk1ka1n47kfm3gn797gm69hoc3s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.abhishek.besocial",
+            "certificate_hash": "329654edc6020fc2bff9b9c726c125da56592b57"
+          }
+        },
+        {
+          "client_id": "353526672622-7tervc0mslqt5eclqutn5cfopsms8i1a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAs3bOUF3R2OVsOmaCG9TR8y5A_yhTnJG4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "353526672622-7tervc0mslqt5eclqutn5cfopsms8i1a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
