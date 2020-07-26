@@ -57,4 +57,7 @@ flutter:
     - family: Ubuntu
       fonts:
         - asset: fonts/Ubuntu-Regular.ttf
+    - family: Dancing_Script
+      fonts:
+        - asset: fonts/DancingScript-VariableFont_wght.ttf
 

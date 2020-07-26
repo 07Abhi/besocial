@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:besocial/model/usermodel.dart';
 import 'package:besocial/screens/createuser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -7,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_auth_buttons/flutter_auth_buttons.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'timelinepage.dart';
 import 'package:besocial/screens/activityfeedpage.dart';
 import 'package:besocial/screens/uploadpage.dart';
 import 'package:besocial/screens/searchpage.dart';
@@ -120,7 +117,7 @@ class _SignInPageState extends State<SignInPage> {
   createFirestoreUser() async {
     // 1. Check if the user is present or not in collection.
     final GoogleSignInAccount user = _googleSignIn.currentUser;
-    final DocumentSnapshot doc = await userRef.document(user.id).get();
+    DocumentSnapshot doc = await userRef.document(user.id).get();
     // 2. if not present then take them to the create user page.
     if (!doc.exists) {
       final username = await Navigator.push(
@@ -139,8 +136,12 @@ class _SignInPageState extends State<SignInPage> {
         'bio': '',
         'timestamp': timeStamp
       });
+      //we get the newly updated data.
+      doc = await userRef.document(user.id).get();
     }
     currentUser = UserData.fromDocument(doc);
+//    print(currentUser);
+//    print(currentUser.username);
   }
 
   login() {
@@ -174,6 +175,7 @@ class _SignInPageState extends State<SignInPage> {
     }, onError: (err) {
       print('Error in Signing in $err');
     });
+    /*it will tries to login the previously signed in account*/
     _googleSignIn.signInSilently(suppressErrors: false).then((account) {
       handleSignIn(account);
     }).catchError((err) {
