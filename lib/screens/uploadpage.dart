@@ -1,5 +1,7 @@
+import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:besocial/screens/signinpage.dart';
+import 'package:flutter/services.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as Im;
@@ -30,6 +32,21 @@ class _UploadState extends State<Upload> {
   File imageFile;
   bool isUploading = false;
   String postId = Uuid().v4();
+
+  getLocation() async {
+    Position position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+
+    List<Placemark> placesaccloc = await Geolocator()
+        .placemarkFromCoordinates(position.latitude, position.longitude);
+    Placemark place = placesaccloc[0];
+    String completeplaceinfo =
+        '${place.locality},${place.name},${place.country},${place.subLocality},${place.position}';
+    print('Place info:- $completeplaceinfo');
+    String precisePlace =
+        '${place.subLocality}, ${place.locality}, ${place.country}';
+    textLocationController.text = precisePlace;
+  }
 
   compressImage() async {
     var getDir = await getTemporaryDirectory();
@@ -237,9 +254,59 @@ class _UploadState extends State<Upload> {
           leading: IconButton(
             icon: Icon(Icons.arrow_back),
             onPressed: () {
-              setState(() {
-                imageFile = null;
-              });
+              showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(
+                        'BeSocial',
+                        style: TextStyle(
+                            fontFamily: 'Ubuntu',
+                            fontSize: 20.0,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black),
+                      ),
+                      content: Text(
+                        'Cancel Upload',
+                        style: TextStyle(
+                          fontFamily: 'Ubuntu',
+                          fontSize: 18.0,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      actions: <Widget>[
+                        FlatButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            setState(() {
+                              imageFile = null;
+                            });
+                          },
+                          color: Colors.teal,
+                          child: Text(
+                            'Discard',
+                            style: TextStyle(
+                              fontFamily: 'Ubuntu',
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        FlatButton(
+                          onPressed: () {
+                            Navigator.of(context).pop(true);
+                          },
+                          color: Colors.teal,
+                          child: Text(
+                            'Keep',
+                            style: TextStyle(
+                              fontFamily: 'Ubuntu',
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  });
             },
             color: Colors.black87,
           ),
@@ -257,7 +324,13 @@ class _UploadState extends State<Upload> {
               child: Padding(
                 padding: const EdgeInsets.only(right: 15.0),
                 child: GestureDetector(
-                  onTap: isUploading ? null : () => handleUpload(),
+                  onTap: isUploading
+                      ? null
+                      : () {
+                          SystemChannels.textInput
+                              .invokeMethod('TextInput.hide');
+                          handleUpload();
+                        },
                   child: Text(
                     isUploading ? '' : 'Post',
                     style: TextStyle(
@@ -349,7 +422,7 @@ class _UploadState extends State<Upload> {
               padding:
                   const EdgeInsets.only(left: 70.0, right: 70.0, top: 30.0),
               child: RaisedButton(
-                onPressed: () {},
+                onPressed: getLocation,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20.0),
                 ),

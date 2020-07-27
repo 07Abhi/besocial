@@ -1,5 +1,5 @@
 import 'package:firebase_storage/firebase_storage.dart';
-import'package:besocial/model/usermodel.dart';
+import 'package:besocial/model/usermodel.dart';
 import 'package:besocial/screens/createuser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,11 +11,13 @@ import 'package:besocial/screens/uploadpage.dart';
 import 'package:besocial/screens/searchpage.dart';
 import 'package:besocial/screens/profilepage.dart';
 
-final GoogleSignIn _googleSignIn = GoogleSignIn();
+final GoogleSignIn googleSignIn = GoogleSignIn();
 final userRef = Firestore.instance.collection('users');
 final postRef = Firestore.instance.collection('userspost');
 final StorageReference storageRef = FirebaseStorage.instance.ref();
+UserData currentUser;
 final DateTime timeStamp = DateTime.now();
+
 class SignInPage extends StatefulWidget {
   @override
   _SignInPageState createState() => _SignInPageState();
@@ -24,9 +26,8 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   bool isAuth = false;
   int pageindex = 0;
-  UserData currentUser;
-  PageController pageController;
 
+  PageController pageController;
 
   Scaffold BuildUnAuthPage() {
     return Scaffold(
@@ -77,7 +78,7 @@ class _SignInPageState extends State<SignInPage> {
           ActivityFeed(),
           Upload(currentUserData: currentUser),
           Search(),
-          Profile(),
+          Profile(profileId: currentUser?.id),
         ],
         controller: pageController,
         onPageChanged: pageChanged,
@@ -119,7 +120,7 @@ class _SignInPageState extends State<SignInPage> {
 
   createFirestoreUser() async {
     // 1. Check if the user is present or not in collection.
-    final GoogleSignInAccount user = _googleSignIn.currentUser;
+    final GoogleSignInAccount user = googleSignIn.currentUser;
     DocumentSnapshot doc = await userRef.document(user.id).get();
     // 2. if not present then take them to the create user page.
     if (!doc.exists) {
@@ -148,11 +149,11 @@ class _SignInPageState extends State<SignInPage> {
   }
 
   login() {
-    _googleSignIn.signIn();
+    googleSignIn.signIn();
   }
 
   logout() {
-    _googleSignIn.signOut();
+    googleSignIn.signOut();
   }
 
   onTap(int pagenum) {
@@ -173,13 +174,13 @@ class _SignInPageState extends State<SignInPage> {
   void initState() {
     super.initState();
     pageController = PageController();
-    _googleSignIn.onCurrentUserChanged.listen((account) {
+    googleSignIn.onCurrentUserChanged.listen((account) {
       handleSignIn(account);
     }, onError: (err) {
       print('Error in Signing in $err');
     });
     /*it will tries to login the previously signed in account*/
-    _googleSignIn.signInSilently(suppressErrors: false).then((account) {
+    googleSignIn.signInSilently(suppressErrors: false).then((account) {
       handleSignIn(account);
     }).catchError((err) {
       print('Error occurred $err');
