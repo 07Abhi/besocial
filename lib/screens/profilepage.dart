@@ -1,3 +1,4 @@
+import 'package:besocial/widgets/postwidget.dart';
 import 'package:besocial/widgets/header.dart';
 import 'package:besocial/model/usermodel.dart';
 import 'package:besocial/screens/signinpage.dart';
@@ -19,20 +20,27 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   final String currentUserId = currentUser?.id;
   var profileData;
+  bool isLoading = false;
+  int postCount = 0;
+  List<Post> posts = [];
 
   editProfile() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => UpdationPage(profileId: currentUser?.id,),
+        builder: (context) => UpdationPage(
+          profileId: currentUser?.id,
+        ),
       ),
     );
   }
-  Future<DocumentSnapshot> fetchData() async{
-    profileData =  await userRef.document(widget.profileId).get();
+
+  Future<DocumentSnapshot> fetchData() async {
+    profileData = await userRef.document(widget.profileId).get();
     return profileData;
   }
-  Future refreshPage() async{
+
+  Future refreshPage() async {
     //await Future.delayed(Duration(seconds: 1));
     var data = await userRef.document(widget.profileId).get();
     setState(() {
@@ -106,7 +114,7 @@ class _ProfileState extends State<Profile> {
 
   FutureBuilder buildProfileHeader() {
     return FutureBuilder(
-      future: fetchData(),//userRef.document(widget.profileId).get(),
+      future: fetchData(), //userRef.document(widget.profileId).get(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           UserData userinfo = UserData.fromDocument(snapshot.data);
@@ -130,16 +138,19 @@ class _ProfileState extends State<Profile> {
                             mainAxisSize: MainAxisSize.max,
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: <Widget>[
-                              buildCountColumn('Post', 0),
+                              buildCountColumn('Post', postCount),
                               buildCountColumn('Followers', 0),
                               buildCountColumn('Following', 0),
                             ],
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: <Widget>[
-                              buildEditButton(),
-                            ],
+                          Padding(
+                            padding: const EdgeInsets.only(top: 15.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: <Widget>[
+                                buildEditButton(),
+                              ],
+                            ),
                           ),
                         ],
                       ),
@@ -189,6 +200,39 @@ class _ProfileState extends State<Profile> {
     );
   }
 
+  getProfilePost() async {
+    setState(() {
+      isLoading = true;
+    });
+    QuerySnapshot snapshot = await postRef
+        .document(widget.profileId)
+        .collection('userspost')
+        .orderBy('timeStamp', descending: true)
+        .getDocuments();
+    setState(() {
+      isLoading = false;
+      postCount = snapshot.documents.length;
+      posts = snapshot.documents.map((docs) => Post.getDocument(docs)).toList();
+    });
+    print(postCount);
+    print(posts);
+  }
+
+  buildProfilePost() {
+    if (isLoading) {
+      return circularProgress();
+    }
+    return Column(
+      children: posts,
+    );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    getProfilePost();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -199,6 +243,10 @@ class _ProfileState extends State<Profile> {
         child: ListView(
           children: <Widget>[
             buildProfileHeader(),
+            Divider(
+              height: 0.1,
+            ),
+            buildProfilePost()
           ],
         ),
       ),
