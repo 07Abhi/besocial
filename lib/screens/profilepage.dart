@@ -3,6 +3,7 @@ import 'package:besocial/model/usermodel.dart';
 import 'package:besocial/screens/signinpage.dart';
 import 'package:besocial/widgets/progressbars.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:besocial/screens/updationpage.dart';
 
@@ -17,6 +18,7 @@ class Profile extends StatefulWidget {
 
 class _ProfileState extends State<Profile> {
   final String currentUserId = currentUser?.id;
+  var profileData;
 
   editProfile() {
     Navigator.push(
@@ -25,6 +27,18 @@ class _ProfileState extends State<Profile> {
         builder: (context) => UpdationPage(profileId: currentUser?.id,),
       ),
     );
+  }
+  Future<DocumentSnapshot> fetchData() async{
+    profileData =  await userRef.document(widget.profileId).get();
+    return profileData;
+  }
+  Future refreshPage() async{
+    //await Future.delayed(Duration(seconds: 1));
+    var data = await userRef.document(widget.profileId).get();
+    setState(() {
+      profileData = data;
+    });
+    return null;
   }
 
   Container buildButton({String btnText, Function func}) {
@@ -92,7 +106,7 @@ class _ProfileState extends State<Profile> {
 
   FutureBuilder buildProfileHeader() {
     return FutureBuilder(
-      future: userRef.document(widget.profileId).get(),
+      future: fetchData(),//userRef.document(widget.profileId).get(),
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           UserData userinfo = UserData.fromDocument(snapshot.data);
@@ -180,10 +194,13 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       appBar: Header(context,
           isTitle: true, titleText: 'Profile', removebackBtn: true),
-      body: ListView(
-        children: <Widget>[
-          buildProfileHeader(),
-        ],
+      body: RefreshIndicator(
+        onRefresh: refreshPage,
+        child: ListView(
+          children: <Widget>[
+            buildProfileHeader(),
+          ],
+        ),
       ),
     );
   }
