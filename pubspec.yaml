@@ -32,6 +32,7 @@ dependencies:
   flutter_svg:
   flutter_auth_buttons: ^0.8.0
   flutter_facebook_login: ^3.0.0
+  image_picker: ^0.6.7+4
 
 dev_dependencies:
   flutter_test:

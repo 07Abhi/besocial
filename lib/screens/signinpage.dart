@@ -1,4 +1,5 @@
-import 'package:besocial/model/usermodel.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import'package:besocial/model/usermodel.dart';
 import 'package:besocial/screens/createuser.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -12,7 +13,9 @@ import 'package:besocial/screens/profilepage.dart';
 
 final GoogleSignIn _googleSignIn = GoogleSignIn();
 final userRef = Firestore.instance.collection('users');
-
+final postRef = Firestore.instance.collection('userspost');
+final StorageReference storageRef = FirebaseStorage.instance.ref();
+final DateTime timeStamp = DateTime.now();
 class SignInPage extends StatefulWidget {
   @override
   _SignInPageState createState() => _SignInPageState();
@@ -23,7 +26,7 @@ class _SignInPageState extends State<SignInPage> {
   int pageindex = 0;
   UserData currentUser;
   PageController pageController;
-  final DateTime timeStamp = DateTime.now();
+
 
   Scaffold BuildUnAuthPage() {
     return Scaffold(
@@ -72,7 +75,7 @@ class _SignInPageState extends State<SignInPage> {
             color: Colors.blue,
           ),
           ActivityFeed(),
-          Uplaod(),
+          Upload(currentUserData: currentUser),
           Search(),
           Profile(),
         ],
