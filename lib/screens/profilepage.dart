@@ -1,3 +1,4 @@
+import 'package:besocial/widgets/post_tiles_gridviews.dart';
 import 'package:besocial/widgets/postwidget.dart';
 import 'package:besocial/widgets/header.dart';
 import 'package:besocial/model/usermodel.dart';
@@ -214,17 +215,28 @@ class _ProfileState extends State<Profile> {
       postCount = snapshot.documents.length;
       posts = snapshot.documents.map((docs) => Post.getDocument(docs)).toList();
     });
-    print(postCount);
-    print(posts);
   }
 
   buildProfilePost() {
     if (isLoading) {
       return circularProgress();
     }
-    return Column(
-      children: posts,
+    List<GridTile> gridTiles = [];
+    posts.forEach((post) {
+      gridTiles.add(GridTile(child: PostTile(post)));
+    });
+    return GridView.count(
+      crossAxisCount: 3,
+      mainAxisSpacing: 1.5,
+      crossAxisSpacing: 1.5,
+      childAspectRatio: 1.0,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      children: gridTiles,
     );
+//    return Column(
+//      children: posts,
+//    );
   }
 
   @override

@@ -1,3 +1,4 @@
+import 'package:besocial/widgets/custom_image_widget.dart';
 import 'package:besocial/model/usermodel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -133,7 +134,7 @@ class _PostState extends State<Post> {
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
-          Image.network(mediaUrl),
+          cacheNetworkImage(mediaUrl),
         ],
       ),
     );
