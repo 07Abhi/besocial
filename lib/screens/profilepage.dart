@@ -1,3 +1,5 @@
+import 'package:besocial/main.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:besocial/widgets/post_tiles_gridviews.dart';
 import 'package:besocial/widgets/postwidget.dart';
 import 'package:besocial/widgets/header.dart';
@@ -24,6 +26,7 @@ class _ProfileState extends State<Profile> {
   bool isLoading = false;
   int postCount = 0;
   List<Post> posts = [];
+  String postOrientation = 'grid';
 
   editProfile() {
     Navigator.push(
@@ -44,6 +47,7 @@ class _ProfileState extends State<Profile> {
   Future refreshPage() async {
     //await Future.delayed(Duration(seconds: 1));
     var data = await userRef.document(widget.profileId).get();
+    await getProfilePost();
     setState(() {
       profileData = data;
     });
@@ -220,23 +224,58 @@ class _ProfileState extends State<Profile> {
   buildProfilePost() {
     if (isLoading) {
       return circularProgress();
+    } else if (posts.isEmpty) {
+     return noPostAvailable('Let\'s Socialize');
+    } else if (postOrientation == 'grid') {
+      List<GridTile> gridTiles = [];
+      posts.forEach((post) {
+        gridTiles.add(GridTile(child: PostTile(post)));
+      });
+      return GridView.count(
+        crossAxisCount: 3,
+        mainAxisSpacing: 1.5,
+        crossAxisSpacing: 1.5,
+        childAspectRatio: 1.0,
+        shrinkWrap: true,
+        physics: NeverScrollableScrollPhysics(),
+        children: gridTiles,
+      );
+    } else if (postOrientation == 'list') {
+      return Column(
+        children: posts,
+      );
     }
-    List<GridTile> gridTiles = [];
-    posts.forEach((post) {
-      gridTiles.add(GridTile(child: PostTile(post)));
+  }
+
+  setPostOrientation(String postOri) {
+    setState(() {
+      postOrientation = postOri;
     });
-    return GridView.count(
-      crossAxisCount: 3,
-      mainAxisSpacing: 1.5,
-      crossAxisSpacing: 1.5,
-      childAspectRatio: 1.0,
-      shrinkWrap: true,
-      physics: NeverScrollableScrollPhysics(),
-      children: gridTiles,
+  }
+
+  Padding buildTogglePostOrientation() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: <Widget>[
+          IconButton(
+            onPressed: () => setPostOrientation('grid'),
+            icon: Icon(Icons.grid_on),
+            color: postOrientation == 'grid'
+                ? Theme.of(context).primaryColor
+                : Colors.grey,
+          ),
+          IconButton(
+            onPressed: () => setPostOrientation('list'),
+            icon: Icon(Icons.format_list_bulleted),
+            color: postOrientation == 'list'
+                ? Theme.of(context).primaryColor
+                : Colors.grey,
+          ),
+        ],
+      ),
     );
-//    return Column(
-//      children: posts,
-//    );
   }
 
   @override
@@ -256,7 +295,11 @@ class _ProfileState extends State<Profile> {
           children: <Widget>[
             buildProfileHeader(),
             Divider(
-              height: 0.1,
+              height: 0.5,
+            ),
+            buildTogglePostOrientation(),
+            Divider(
+              height: 0.5,
             ),
             buildProfilePost()
           ],

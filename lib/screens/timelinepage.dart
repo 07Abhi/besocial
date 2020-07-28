@@ -1,8 +1,5 @@
 import 'package:besocial/widgets/header.dart';
 import 'package:flutter/material.dart';
-import '../widgets/progressbars.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:besocial/widgets/progressbars.dart';
 
 class Timeline extends StatefulWidget {
   @override

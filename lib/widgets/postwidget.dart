@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'package:animator/animator.dart';
+import 'package:besocial/screens/comments.dart';
 import 'package:besocial/widgets/custom_image_widget.dart';
 import 'package:besocial/model/usermodel.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -67,6 +70,7 @@ class Post extends StatefulWidget {
 
 class _PostState extends State<Post> {
   final String postId;
+  final String currentUserId = currentUser?.id;
   final String ownerId;
   final String caption;
   final String mediaUrl;
@@ -74,6 +78,8 @@ class _PostState extends State<Post> {
   final String location;
   Map likes;
   int likesCount;
+  bool isLiked;
+  bool showHeart = false;
 
   _PostState({
     this.postId,
@@ -128,17 +134,71 @@ class _PostState extends State<Post> {
     );
   }
 
+  addLikeToPost() {
+    bool _isLiked = likes[currentUserId] == true;
+    if (_isLiked) {
+      postRef
+          .document(ownerId)
+          .collection('userspost')
+          .document(postId)
+          .updateData({'likes.$currentUserId': false});
+      setState(() {
+        likesCount -= 1;
+        isLiked = false;
+        likes[currentUserId] = false;
+      });
+    } else if (!_isLiked) {
+      postRef
+          .document(ownerId)
+          .collection('userspost')
+          .document(postId)
+          .updateData({'likes.$currentUserId': true});
+      setState(() {
+        likesCount += 1;
+        isLiked = true;
+        likes[currentUserId] = true;
+        showHeart = true;
+      });
+      Timer(Duration(milliseconds: 500), () {
+        setState(() {
+          showHeart = false;
+        });
+      });
+    }
+  }
+
   buildPostDisplay() {
     return GestureDetector(
-      onDoubleTap: () {},
+      onDoubleTap: addLikeToPost,
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           cacheNetworkImage(mediaUrl),
+          showHeart
+              ? Animator(
+                  duration: Duration(milliseconds: 350),
+                  tween: Tween(begin: 0.8, end: 1.2),
+                  curve: Curves.easeIn,
+                  cycles: 0,
+                  builder: (context, anim, child) => Transform.scale(
+                    scale: anim.value,
+                    child: Icon(
+                      Icons.favorite,
+                      size: 80.0,
+                      color: Colors.white70,
+                    ),
+                  ),
+                )
+              : Text(''),
+//          showHeart?Icon(Icons.favorite,size: 80.0,color: Colors.white70,):Text(''),
         ],
       ),
     );
   }
+
+//  commentSection(){
+//
+//  }
 
   buildPostFooter() {
     return Column(
@@ -149,17 +209,34 @@ class _PostState extends State<Post> {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             children: <Widget>[
-              Icon(
-                Icons.favorite_border,
-                color: Colors.redAccent,
-                size: 28.0,
+              GestureDetector(
+                child: Icon(
+                  isLiked ? Icons.favorite : Icons.favorite_border,
+                  color: Colors.redAccent,
+                  size: 28.0,
+                ),
+                onTap: addLikeToPost,
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 20.0),
-                child: Icon(
-                  Icons.insert_comment,
-                  color: Colors.blue.shade900,
-                  size: 28.0,
+                child: GestureDetector(
+                  child: Icon(
+                    Icons.insert_comment,
+                    color: Colors.blue.shade900,
+                    size: 28.0,
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                         builder: (context) => Comments(
+                          cpostId: postId,
+                          postmediaUrl: mediaUrl,
+                          postownerId: ownerId,
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],
@@ -181,7 +258,7 @@ class _PostState extends State<Post> {
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
             Padding(
-              padding: const EdgeInsets.only(left: 20.0,top: 5.0),
+              padding: const EdgeInsets.only(left: 20.0, top: 5.0),
               child: Text(
                 username,
                 style: TextStyle(
@@ -195,7 +272,7 @@ class _PostState extends State<Post> {
             Expanded(
               flex: 1,
               child: Padding(
-                padding: const EdgeInsets.only(left: 10.0,top:5.0),
+                padding: const EdgeInsets.only(left: 10.0, top: 5.0),
                 child: Text(
                   caption,
                   style: TextStyle(
@@ -211,7 +288,10 @@ class _PostState extends State<Post> {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
-          child: Divider(height: 0.4,color: Colors.grey,),
+          child: Divider(
+            height: 0.4,
+            color: Colors.grey,
+          ),
         )
       ],
     );
@@ -219,6 +299,7 @@ class _PostState extends State<Post> {
 
   @override
   Widget build(BuildContext context) {
+    isLiked = (likes[currentUserId] == true);
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
@@ -228,4 +309,18 @@ class _PostState extends State<Post> {
       ],
     );
   }
+}
+
+commentsSection(BuildContext context,
+    {String postId, String ownerId, String mediaUrl}) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) {
+      return Comments(
+        cpostId: postId,
+        postownerId: ownerId,
+        postmediaUrl: mediaUrl,
+      );
+    }),
+  );
 }

@@ -2,6 +2,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:besocial/screens/signinpage.dart';
 import 'package:flutter/services.dart';
+import 'package:modal_progress_hud/modal_progress_hud.dart';
 import 'package:uuid/uuid.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as Im;
@@ -32,8 +33,12 @@ class _UploadState extends State<Upload> {
   File imageFile;
   bool isUploading = false;
   String postId = Uuid().v4();
+  bool showSpinner = false;
 
   getLocation() async {
+    setState(() {
+      showSpinner = true;
+    });
     Position position = await Geolocator()
         .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
 
@@ -42,10 +47,12 @@ class _UploadState extends State<Upload> {
     Placemark place = placesaccloc[0];
     String completeplaceinfo =
         '${place.locality},${place.name},${place.country},${place.subLocality},${place.position}';
-    print('Place info:- $completeplaceinfo');
     String precisePlace =
         '${place.subLocality}, ${place.locality}, ${place.country}';
     textLocationController.text = precisePlace;
+    setState(() {
+      showSpinner = false;
+    });
   }
 
   compressImage() async {
@@ -247,211 +254,214 @@ class _UploadState extends State<Upload> {
     );
   }
 
-  Scaffold buildUploadImage() {
-    return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white70,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back),
-            onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: Text(
-                        'BeSocial',
-                        style: TextStyle(
+  ModalProgressHUD buildUploadImage() {
+    return ModalProgressHUD(
+      inAsyncCall: showSpinner,
+      child: Scaffold(
+          appBar: AppBar(
+            backgroundColor: Colors.white70,
+            leading: IconButton(
+              icon: Icon(Icons.arrow_back),
+              onPressed: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text(
+                          'BeSocial',
+                          style: TextStyle(
+                              fontFamily: 'Ubuntu',
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black),
+                        ),
+                        content: Text(
+                          'Cancel Upload',
+                          style: TextStyle(
                             fontFamily: 'Ubuntu',
-                            fontSize: 20.0,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black),
-                      ),
-                      content: Text(
-                        'Cancel Upload',
-                        style: TextStyle(
-                          fontFamily: 'Ubuntu',
-                          fontSize: 18.0,
-                          color: Colors.black54,
-                        ),
-                      ),
-                      actions: <Widget>[
-                        FlatButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                            setState(() {
-                              imageFile = null;
-                            });
-                          },
-                          color: Colors.teal,
-                          child: Text(
-                            'Discard',
-                            style: TextStyle(
-                              fontFamily: 'Ubuntu',
-                              color: Colors.white,
-                            ),
+                            fontSize: 18.0,
+                            color: Colors.black54,
                           ),
                         ),
-                        FlatButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(true);
-                          },
-                          color: Colors.teal,
-                          child: Text(
-                            'Keep',
-                            style: TextStyle(
-                              fontFamily: 'Ubuntu',
-                              color: Colors.white,
+                        actions: <Widget>[
+                          FlatButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              setState(() {
+                                imageFile = null;
+                              });
+                            },
+                            color: Colors.teal,
+                            child: Text(
+                              'Discard',
+                              style: TextStyle(
+                                fontFamily: 'Ubuntu',
+                                color: Colors.white,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    );
-                  });
-            },
-            color: Colors.black87,
-          ),
-          title: Text(
-            'Captionization',
-            style: TextStyle(
-              fontSize: 20.0,
-              fontFamily: 'Ubuntu',
+                          FlatButton(
+                            onPressed: () {
+                              Navigator.of(context).pop(true);
+                            },
+                            color: Colors.teal,
+                            child: Text(
+                              'Keep',
+                              style: TextStyle(
+                                fontFamily: 'Ubuntu',
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    });
+              },
               color: Colors.black87,
             ),
-          ),
-          centerTitle: true,
-          actions: <Widget>[
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.only(right: 15.0),
-                child: GestureDetector(
-                  onTap: isUploading
-                      ? null
-                      : () {
-                          SystemChannels.textInput
-                              .invokeMethod('TextInput.hide');
-                          handleUpload();
-                        },
-                  child: Text(
-                    isUploading ? '' : 'Post',
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      fontFamily: 'Ubuntu',
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
+            title: Text(
+              'Captionization',
+              style: TextStyle(
+                fontSize: 20.0,
+                fontFamily: 'Ubuntu',
+                color: Colors.black87,
+              ),
+            ),
+            centerTitle: true,
+            actions: <Widget>[
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.only(right: 15.0),
+                  child: GestureDetector(
+                    onTap: isUploading
+                        ? null
+                        : () {
+                            SystemChannels.textInput
+                                .invokeMethod('TextInput.hide');
+                            handleUpload();
+                          },
+                    child: Text(
+                      isUploading ? '' : 'Post',
+                      style: TextStyle(
+                        fontSize: 20.0,
+                        fontFamily: 'Ubuntu',
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        body: ListView(
-          children: <Widget>[
-            isUploading ? linearProgress() : SizedBox(),
-            Padding(
-              padding: const EdgeInsets.only(top: 15.0),
-              child: Container(
-                height: 220.0,
-                width: MediaQuery.of(context).size.width * 0.8,
-                child: Center(
-                  child: AspectRatio(
-                    aspectRatio: 16 / 9,
-                    child: Container(
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          fit: BoxFit.cover,
-                          image: FileImage(imageFile),
+            ],
+          ),
+          body: ListView(
+            children: <Widget>[
+              isUploading ? linearProgress() : SizedBox(),
+              Padding(
+                padding: const EdgeInsets.only(top: 15.0),
+                child: Container(
+                  height: 220.0,
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 16 / 9,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: FileImage(imageFile),
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(top: 10.0),
-            ),
-            ListTile(
-              leading: CircleAvatar(
-                radius: 30.0,
-                backgroundColor: Colors.grey,
-                backgroundImage:
-                    CachedNetworkImageProvider(widget.currentUserData.photoUrl),
+              Padding(
+                padding: EdgeInsets.only(top: 10.0),
               ),
-              title: Container(
-                width: 250.0,
-                child: TextField(
-                  controller: textCaptionController,
-                  decoration: InputDecoration(
-                    hintText: 'Your Caption.....',
-                    hintStyle: TextStyle(fontFamily: 'Ubuntu'),
-                    border: InputBorder.none,
+              ListTile(
+                leading: CircleAvatar(
+                  radius: 30.0,
+                  backgroundColor: Colors.grey,
+                  backgroundImage: CachedNetworkImageProvider(
+                      widget.currentUserData.photoUrl),
+                ),
+                title: Container(
+                  width: 250.0,
+                  child: TextField(
+                    controller: textCaptionController,
+                    decoration: InputDecoration(
+                      hintText: 'Your Caption.....',
+                      hintStyle: TextStyle(fontFamily: 'Ubuntu'),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SizedBox(
-              height: 10.0,
-            ),
-            Divider(
-              height: 1.5,
-              color: Colors.blueGrey,
-            ),
-            SizedBox(
-              height: 10.0,
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.location_on,
-                color: Colors.deepOrange,
-                size: 35.0,
+              SizedBox(
+                height: 10.0,
               ),
-              title: Container(
-                width: 250.0,
-                child: TextField(
-                  controller: textLocationController,
-                  decoration: InputDecoration(
-                    hintText: 'Location.....',
-                    hintStyle: TextStyle(fontFamily: 'Ubuntu'),
-                    border: InputBorder.none,
+              Divider(
+                height: 1.5,
+                color: Colors.blueGrey,
+              ),
+              SizedBox(
+                height: 10.0,
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.location_on,
+                  color: Colors.deepOrange,
+                  size: 35.0,
+                ),
+                title: Container(
+                  width: 250.0,
+                  child: TextField(
+                    controller: textLocationController,
+                    decoration: InputDecoration(
+                      hintText: 'Location.....',
+                      hintStyle: TextStyle(fontFamily: 'Ubuntu'),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
               ),
-            ),
-            Padding(
-              padding:
-                  const EdgeInsets.only(left: 70.0, right: 70.0, top: 30.0),
-              child: RaisedButton(
-                onPressed: getLocation,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                color: Colors.blue,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(
-                      Icons.my_location,
-                      color: Colors.white,
-                    ),
-                    SizedBox(
-                      width: 15.0,
-                    ),
-                    Text(
-                      'Use device location',
-                      style: TextStyle(
-                        fontFamily: 'Ubuntu',
-                        fontSize: 15.0,
-                        fontWeight: FontWeight.bold,
+              Padding(
+                padding:
+                    const EdgeInsets.only(left: 70.0, right: 70.0, top: 30.0),
+                child: RaisedButton(
+                  onPressed: getLocation,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20.0),
+                  ),
+                  color: Colors.blue,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: <Widget>[
+                      Icon(
+                        Icons.my_location,
                         color: Colors.white,
                       ),
-                    ),
-                  ],
+                      SizedBox(
+                        width: 15.0,
+                      ),
+                      Text(
+                        'Use device location',
+                        style: TextStyle(
+                          fontFamily: 'Ubuntu',
+                          fontSize: 15.0,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
-        ));
+            ],
+          )),
+    );
   }
 
   @override

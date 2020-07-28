@@ -1,3 +1,5 @@
+import 'dart:developer';
+import 'package:besocial/screens/timelinepage.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:besocial/model/usermodel.dart';
 import 'package:besocial/screens/createuser.dart';
@@ -12,6 +14,7 @@ import 'package:besocial/screens/searchpage.dart';
 import 'package:besocial/screens/profilepage.dart';
 
 final GoogleSignIn googleSignIn = GoogleSignIn();
+final commentRef = Firestore.instance.collection('comments');
 final userRef = Firestore.instance.collection('users');
 final postRef = Firestore.instance.collection('userspost');
 final StorageReference storageRef = FirebaseStorage.instance.ref();
@@ -70,11 +73,7 @@ class _SignInPageState extends State<SignInPage> {
     return Scaffold(
       body: PageView(
         children: <Widget>[
-          RaisedButton(
-            onPressed: logout,
-            child: Text('LogOut'),
-            color: Colors.blue,
-          ),
+          Timeline(),
           ActivityFeed(),
           Upload(currentUserData: currentUser),
           Search(),
