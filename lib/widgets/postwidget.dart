@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:besocial/screens/activityfeedpage.dart';
 import 'package:besocial/screens/signinpage.dart';
 import 'package:animator/animator.dart';
 import 'package:besocial/screens/comments.dart';
@@ -105,7 +106,7 @@ class _PostState extends State<Post> {
               backgroundImage: CachedNetworkImageProvider(userInfo.photoUrl),
             ),
             title: GestureDetector(
-              onTap: () {},
+              onTap: ()=>showProfile(context,ProfileId: ownerId),
               child: Text(
                 userInfo.displayName,
                 style: TextStyle(

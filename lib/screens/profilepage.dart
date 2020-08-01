@@ -1,4 +1,3 @@
-
 import 'package:besocial/main.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:besocial/widgets/post_tiles_gridviews.dart';
@@ -86,6 +85,13 @@ class _ProfileState extends State<Profile> {
     bool isProfileisMine = currentUserId == widget.profileId;
     if (isProfileisMine) {
       return buildButton(btnText: 'Edit Profile', func: editProfile);
+    } else {
+      buildButton(
+        btnText: 'follow',
+        func: () {
+          print('followed');
+        },
+      );
     }
   }
 
@@ -226,7 +232,7 @@ class _ProfileState extends State<Profile> {
     if (isLoading) {
       return circularProgress();
     } else if (posts.isEmpty) {
-     return noPostAvailable('Let\'s Socialize');
+      return noPostAvailable('Let\'s Socialize');
     } else if (postOrientation == 'grid') {
       List<GridTile> gridTiles = [];
       posts.forEach((post) {

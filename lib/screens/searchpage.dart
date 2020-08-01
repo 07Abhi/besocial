@@ -1,4 +1,5 @@
 import 'package:besocial/model/usermodel.dart';
+import 'package:besocial/screens/activityfeedpage.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
@@ -135,7 +136,7 @@ class UserResult extends StatelessWidget {
       child: Column(
         children: <Widget>[
           GestureDetector(
-            onTap: () {},
+            onTap:showProfile(context,ProfileId: user.id),
             child: ListTile(
               leading: CircleAvatar(
                 radius: 30.0,

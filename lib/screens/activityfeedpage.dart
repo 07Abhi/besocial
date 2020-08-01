@@ -1,3 +1,5 @@
+import 'profilepage.dart';
+import 'package:besocial/screens/particularpostscreen.dart';
 import 'package:besocial/screens/signinpage.dart';
 import 'package:besocial/widgets/header.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -93,10 +95,24 @@ class ActivityFeedItems extends StatelessWidget {
     );
   }
 
-  configureMediaPreview() {
+  showPost(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return PostScreen(
+            postId: postId,
+            userId: userId,
+          );
+        },
+      ),
+    );
+  }
+
+  configureMediaPreview(BuildContext context) {
     if (type == 'like' || type == 'comment') {
       mediaPreview = GestureDetector(
-        onTap: () => print('Showing the data'),
+        onTap: () => showPost(context),
         child: Container(
           height: 50.0,
           width: 60.0,
@@ -127,14 +143,14 @@ class ActivityFeedItems extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    configureMediaPreview();
+    configureMediaPreview(context);
     return Padding(
       padding: EdgeInsets.only(bottom: 20.0),
       child: Container(
         color: Colors.white70,
         child: ListTile(
           title: GestureDetector(
-            onTap: () => print('Show Profile'),
+            onTap: () => showProfile(context,ProfileId: userId),
             child: RichText(
               overflow: TextOverflow.ellipsis,
               text: TextSpan(
@@ -167,4 +183,17 @@ class ActivityFeedItems extends StatelessWidget {
       ),
     );
   }
+}
+
+showProfile(BuildContext context, {String ProfileId}) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) {
+        return Profile(
+          profileId: ProfileId,
+        );
+      },
+    ),
+  );
 }

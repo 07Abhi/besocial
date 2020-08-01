@@ -11,6 +11,7 @@ PreferredSize Header(BuildContext context,{bool isTitle = false,String titleText
           fontFamily: isTitle?'Ubuntu':'Signatra',
           fontSize: isTitle?25.0:50.0,
         ),
+        overflow: TextOverflow.ellipsis,
       ),
       automaticallyImplyLeading: removebackBtn?false:true,
       centerTitle: true,
