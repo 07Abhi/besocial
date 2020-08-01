@@ -132,33 +132,33 @@ class UserResult extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).primaryColor.withOpacity(0.7),
+      color: Theme.of(context).primaryColor.withOpacity(0.8),
       child: Column(
         children: <Widget>[
-          GestureDetector(
-            onTap:showProfile(context,ProfileId: user.id),
-            child: ListTile(
-              leading: CircleAvatar(
+          ListTile(
+            leading: GestureDetector(
+              onTap: ()=>showProfile(context,ProfileId: user.id),
+              child: CircleAvatar(
                 radius: 30.0,
                 backgroundColor: Colors.grey,
                 backgroundImage: CachedNetworkImageProvider(user.photoUrl),
               ),
-              title: Text(
-                user.displayName,
-                style: TextStyle(
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.bold,
-                  fontFamily: 'Ubuntu',
-                  color: Colors.white,
-                ),
+            ),
+            title: Text(
+              user.displayName,
+              style: TextStyle(
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                fontFamily: 'Ubuntu',
+                color: Colors.white,
               ),
-              subtitle: Text(
-                user.username,
-                style: TextStyle(
-                  fontFamily: 'Ubuntu',
-                  fontSize: 16.0,
-                  color: Colors.white,
-                ),
+            ),
+            subtitle: Text(
+              user.username,
+              style: TextStyle(
+                fontFamily: 'Ubuntu',
+                fontSize: 16.0,
+                color: Colors.white,
               ),
             ),
           ),
