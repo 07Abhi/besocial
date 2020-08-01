@@ -45,8 +45,8 @@ class _UploadState extends State<Upload> {
     List<Placemark> placesaccloc = await Geolocator()
         .placemarkFromCoordinates(position.latitude, position.longitude);
     Placemark place = placesaccloc[0];
-    String completeplaceinfo =
-        '${place.locality},${place.name},${place.country},${place.subLocality},${place.position}';
+//    String completeplaceinfo =
+//        '${place.locality},${place.name},${place.country},${place.subLocality},${place.position}';
     String precisePlace =
         '${place.subLocality}, ${place.locality}, ${place.country}';
     textLocationController.text = precisePlace;
@@ -56,7 +56,9 @@ class _UploadState extends State<Upload> {
   }
 
   compressImage() async {
+    //the temporary directory is made when we click the image or select from the gallery.
     var getDir = await getTemporaryDirectory();
+    //here we took the path of it.
     final path = getDir.path;
     Im.Image imgfile = Im.decodeImage(imageFile.readAsBytesSync());
     final compressedImgFile = File('$path/img_$postId.jpg')
@@ -106,10 +108,12 @@ class _UploadState extends State<Upload> {
     );
     textLocationController.clear();
     textCaptionController.clear();
-    setState(() {
-      imageFile = null;
-      isUploading = false;
-    });
+    setState(
+      () {
+        imageFile = null;
+        isUploading = false;
+      },
+    );
   }
 
   handleTakePhoto() async {

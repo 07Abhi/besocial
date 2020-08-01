@@ -17,6 +17,7 @@ final GoogleSignIn googleSignIn = GoogleSignIn();
 final commentRef = Firestore.instance.collection('comments');
 final userRef = Firestore.instance.collection('users');
 final postRef = Firestore.instance.collection('userspost');
+final activityFeedRef = Firestore.instance.collection('feeds');
 final StorageReference storageRef = FirebaseStorage.instance.ref();
 UserData currentUser;
 final DateTime timeStamp = DateTime.now();
@@ -130,15 +131,17 @@ class _SignInPageState extends State<SignInPage> {
         ),
       );
       // 3. get username from create accounts and use it to make the documents in user collection.
-      userRef.document(user.id).setData({
-        'id': user.id,
-        'username': username,
-        'photourl': user.photoUrl,
-        'email': user.email,
-        'displayName': user.displayName,
-        'bio': '',
-        'timestamp': timeStamp
-      });
+      userRef.document(user.id).setData(
+        {
+          'id': user.id,
+          'username': username,
+          'photourl': user.photoUrl,
+          'email': user.email,
+          'displayName': user.displayName,
+          'bio': '',
+          'timestamp': timeStamp
+        },
+      );
       //we get the newly updated data.
       doc = await userRef.document(user.id).get();
     }

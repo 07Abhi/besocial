@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:besocial/screens/signinpage.dart';
 import 'package:animator/animator.dart';
 import 'package:besocial/screens/comments.dart';
 import 'package:besocial/widgets/custom_image_widget.dart';
@@ -142,12 +143,14 @@ class _PostState extends State<Post> {
           .collection('userspost')
           .document(postId)
           .updateData({'likes.$currentUserId': false});
+      removeLikeFromActivityFeed();
       setState(() {
         likesCount -= 1;
         isLiked = false;
         likes[currentUserId] = false;
       });
     } else if (!_isLiked) {
+      appLikeToActivity();
       postRef
           .document(ownerId)
           .collection('userspost')
@@ -164,6 +167,46 @@ class _PostState extends State<Post> {
           showHeart = false;
         });
       });
+    }
+  }
+
+  appLikeToActivity() {
+    /*to get notification for the post liked by the other users not by our own */
+    bool isNotPostOwner = currentUserId != ownerId;
+    if (isNotPostOwner) {
+      activityFeedRef
+          .document(ownerId)
+          .collection('feeditems')
+          .document(postId)
+          .setData(
+        {
+          'type': 'like',
+          'username': currentUser.username,
+          'userId': currentUser.id,
+          'userprofilieImgae': currentUser.photoUrl,
+          'postId': postId,
+          'mediaUrl': mediaUrl,
+          'timeStamp': timeStamp
+        },
+      );
+    }
+  }
+
+  removeLikeFromActivityFeed() {
+    bool isNotPostOwner = currentUserId != ownerId;
+    if (isNotPostOwner) {
+      activityFeedRef
+          .document(ownerId)
+          .collection('feeditems')
+          .document(postId)
+          .get()
+          .then(
+        (doc) {
+          if (doc.exists) {
+            doc.reference.delete();
+          }
+        },
+      );
     }
   }
 
@@ -229,7 +272,7 @@ class _PostState extends State<Post> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                         builder: (context) => Comments(
+                        builder: (context) => Comments(
                           cpostId: postId,
                           postmediaUrl: mediaUrl,
                           postownerId: ownerId,
